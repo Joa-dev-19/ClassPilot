@@ -91,7 +91,4 @@ Les étapes ci-dessous sont une checklist générique. Le fournisseur d’héber
    ```
 
 7. Mettre en place une sauvegarde de base de données et vérifier la procédure de restauration avant la première livraison.
-8. Configurer le planificateur Laravel. ClassPilot traite les rappels chaque minute ; l’hébergeur doit exécuter `php artisan schedule:run` chaque minute, ou fournir un planificateur équivalent.
-9. Après le déploiement, vérifier l’inscription, la réception et l’utilisation d’un lien de vérification, la connexion, la réinitialisation du mot de passe, les rôles et l’envoi d’un rappel. Vérifier également les journaux sans y exposer de secret.
-
-Ne pas déclarer l’application prête en production avant d’avoir exécuté ces contrôles sur l’environnement cible. Le déploiement lui-même nécessite une autorisation et des accès à l’hébergeur.
+8. Configurer le planificateur Laravel
