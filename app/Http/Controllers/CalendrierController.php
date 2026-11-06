@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Devoir;
 use App\Models\Rappel;
 use App\Models\Tache;
 use Carbon\CarbonImmutable;
@@ -36,6 +37,17 @@ class CalendrierController extends Controller
             fn (Tache $tache): string => CarbonImmutable::parse($tache->date_limite)->toDateString()
         );
 
+        $devoirsDuMois = Devoir::query()
+            ->where('statut', Devoir::STATUS_PUBLISHED)
+            ->whereDate('date_limite', '>=', $start->toDateString())
+            ->whereDate('date_limite', '<=', $end->toDateString())
+            ->orderBy('date_limite')
+            ->get();
+
+        $devoirsParDate = $devoirsDuMois->groupBy(
+            fn (Devoir $devoir): string => $devoir->date_limite->toDateString()
+        );
+
         $premierJour = $start->startOfWeek(CarbonImmutable::MONDAY);
         $dernierJour = $end->endOfWeek(CarbonImmutable::SUNDAY);
         $joursCalendrier = [];
@@ -62,6 +74,8 @@ class CalendrierController extends Controller
             'month' => $month,
             'joursCalendrier' => $joursCalendrier,
             'tachesParDate' => $tachesParDate,
+            'devoirsParDate' => $devoirsParDate,
+            'devoirsDuMois' => $devoirsDuMois,
             'taches' => $taches,
             'echeancesProches' => $echeancesProches,
             'tachesEnRetard' => $tachesEnRetard,

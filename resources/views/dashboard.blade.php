@@ -35,6 +35,21 @@
                         </a>
                     </div>
                 </section>
+            @elseif (auth()->user()->role === \App\Models\User::ROLE_TEACHER)
+                <section aria-labelledby="actions-enseignant">
+                    <h2 id="actions-enseignant" class="text-lg font-semibold text-slate-900">
+                        Espace enseignant
+                    </h2>
+                    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <a href="{{ route('devoirs.index') }}"
+                           class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <h3 class="font-semibold text-slate-900">Mes devoirs</h3>
+                            <p class="mt-2 text-sm leading-6 text-slate-600">
+                                Crée des devoirs, publie-les pour les étudiants et suis leurs échéances.
+                            </p>
+                        </a>
+                    </div>
+                </section>
             @else
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
                          aria-labelledby="espace-personnel">

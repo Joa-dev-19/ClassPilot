@@ -1,6 +1,5 @@
 <x-app-layout>
     <div class="min-h-screen bg-slate-50 px-5 py-8 sm:px-8">
-
         <div class="mx-auto max-w-5xl">
             @if (session('success'))
                 <div class="mb-6 rounded-xl bg-green-100 p-4 text-green-800" role="status">
@@ -46,10 +45,10 @@
                     </p>
                 </div>
             @else
-                <div class="space-y-4">
+                <div class="flex flex-col gap-4">
                     @foreach ($taches as $tache)
-                        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                            <div class="flex flex-wrap items-start justify-between gap-3">
+                        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                            <div class="flex flex-wrap items-start justify-between gap-4">
                                 <div>
                                     <h2 class="font-semibold text-slate-900">
                                         {{ $tache->titre }}
@@ -70,28 +69,48 @@
                                 </div>
 
                                 <div class="text-sm text-slate-600">
-                                    Priorité :
-                                    {{ match ($tache->priorite) {
-                                        'faible' => 'Faible',
-                                        'moyenne' => 'Moyenne',
-                                        'elevee' => 'Élevée',
-                                        default => 'Non définie',
-                                    } }}
-                                    <br>
-                                    Statut :
-                                    {{ match ($tache->statut) {
-                                        'a_faire' => 'À faire',
-                                        'en_cours' => 'En cours',
-                                        'terminee' => 'Terminée',
-                                        default => 'Non défini',
-                                    } }}
+                                    <p>
+                                        Priorité :
+                                        {{ match ($tache->priorite) {
+                                            'faible' => 'Faible',
+                                            'moyenne' => 'Moyenne',
+                                            'elevee' => 'Élevée',
+                                            default => 'Non définie',
+                                        } }}
+                                    </p>
+                                    <p class="mt-1">
+                                        Statut :
+                                        {{ match ($tache->statut) {
+                                            'a_faire' => 'À faire',
+                                            'en_cours' => 'En cours',
+                                            'terminee' => 'Terminée',
+                                            default => 'Non défini',
+                                        } }}
+                                    </p>
                                 </div>
                             </div>
-                        </div>
+
+                            <div class="mt-4 flex flex-wrap gap-3">
+                                <a href="{{ route('taches.edit', $tache) }}"
+                                   class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                                    Modifier
+                                </a>
+
+                                <form action="{{ route('taches.destroy', $tache) }}" method="POST"
+                                      onsubmit="return confirm('Supprimer cette tâche ?')">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit"
+                                            class="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </article>
                     @endforeach
                 </div>
             @endif
-
         </div>
     </div>
 </x-app-layout>

@@ -11,6 +11,8 @@ class Rappel extends Model
 
     public const STATUS_SENT = 'envoye';
 
+    public const STATUS_FAILED = 'echec';
+
     protected $fillable = [
         'tache_id',
         'date_heure_rappel',
@@ -26,6 +28,7 @@ class Rappel extends Model
     {
         return [
             'date_heure_rappel' => 'datetime',
+            'tentatives' => 'integer',
         ];
     }
 }

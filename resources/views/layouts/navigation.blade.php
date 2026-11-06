@@ -19,8 +19,15 @@
                         <x-nav-link :href="route('taches.index')" :active="request()->routeIs('taches.*')">
                             Mes tâches
                         </x-nav-link>
+                        <x-nav-link :href="route('devoirs.etudiants.index')" :active="request()->routeIs('devoirs.etudiants.*')">
+                            Devoirs
+                        </x-nav-link>
                         <x-nav-link :href="route('calendrier.index')" :active="request()->routeIs('calendrier.*')">
                             Calendrier
+                        </x-nav-link>
+                    @elseif (Auth::user()->role === \App\Models\User::ROLE_TEACHER)
+                        <x-nav-link :href="route('devoirs.index')" :active="request()->routeIs('devoirs.*')">
+                            Mes devoirs
                         </x-nav-link>
                     @endif
                 </div>
@@ -80,8 +87,15 @@
                 <x-responsive-nav-link :href="route('taches.index')" :active="request()->routeIs('taches.*')">
                     Mes tâches
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('devoirs.etudiants.index')" :active="request()->routeIs('devoirs.etudiants.*')">
+                    Devoirs
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('calendrier.index')" :active="request()->routeIs('calendrier.*')">
                     Calendrier
+                </x-responsive-nav-link>
+            @elseif (Auth::user()->role === \App\Models\User::ROLE_TEACHER)
+                <x-responsive-nav-link :href="route('devoirs.index')" :active="request()->routeIs('devoirs.*')">
+                    Mes devoirs
                 </x-responsive-nav-link>
             @endif
         </div>

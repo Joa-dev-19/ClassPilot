@@ -2,6 +2,15 @@
 
 ClassPilot est une application web qui aide les élèves et les étudiants à organiser leurs tâches scolaires, leurs échéances et leurs rappels. L’application est développée avec Laravel, Blade, Vite et Tailwind CSS.
 
+## Fonctionnalités
+
+- **Comptes et accès :** inscription étudiante, connexion, vérification de l’adresse e-mail et gestion du profil.
+- **Tâches personnelles :** création, consultation, modification et suppression des tâches.
+- **Calendrier et rappels :** calendrier des échéances et rappels par courriel programmés par l’étudiant.
+- **Devoirs enseignants :** création en brouillon, publication pour tous les étudiants, modification et archivage. Les échéances des devoirs publiés apparaissent dans le calendrier étudiant.
+
+Les devoirs ne prennent pas encore en charge les classes, les groupes, le dépôt de travaux ou les notes.
+
 ## Prérequis
 
 - PHP 8.3 ou une version compatible avec `composer.json` (PHP 8.4 est utilisé dans l’environnement de développement).
@@ -91,4 +100,10 @@ Les étapes ci-dessous sont une checklist générique. Le fournisseur d’héber
    ```
 
 7. Mettre en place une sauvegarde de base de données et vérifier la procédure de restauration avant la première livraison.
-8. Configurer le planificateur Laravel
+8. Configurer le planificateur Laravel. En production, ajouter une seule entrée cron par minute :
+
+   ```cron
+   * * * * * cd /chemin/vers/classpilot && php artisan schedule:run >> /dev/null 2>&1
+   ```
+
+   En développement local, utiliser `php artisan schedule:work` dans un terminal dédié.

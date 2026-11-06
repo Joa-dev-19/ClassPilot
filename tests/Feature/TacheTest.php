@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Rappel;
+use App\Models\Tache;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -122,6 +124,8 @@ class TacheTest extends TestCase
 
         $response->assertOk()
             ->assertSee('Ma tâche privée')
+            ->assertSee('Modifier')
+            ->assertSee('Supprimer')
             ->assertDontSee('Tâche d’un autre étudiant');
     }
 
@@ -137,7 +141,8 @@ class TacheTest extends TestCase
 
         $response = $this->get(route('taches.index'));
 
-        $response->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
+        $response->assertOk()
+            ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
             ->assertDontSee('<script>alert(1)</script>', false);
     }
 
@@ -148,5 +153,128 @@ class TacheTest extends TestCase
         $this->actingAs($teacher)
             ->get(route('taches.create'))
             ->assertForbidden();
+    }
+
+    public function test_a_student_can_edit_and_update_their_task(): void
+    {
+        $student = User::factory()->create();
+        $anotherStudent = User::factory()->create();
+        $tache = Tache::create([
+            'user_id' => $student->id,
+            'titre' => 'Ancien titre',
+            'description' => 'Ancienne description',
+            'date_limite' => '2026-11-02',
+            'priorite' => 'faible',
+            'statut' => 'a_faire',
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('taches.edit', $tache))
+            ->assertOk()
+            ->assertSee('Modifier la tâche')
+            ->assertSee('Ancien titre');
+
+        $response = $this->put(route('taches.update', $tache), [
+            'titre' => 'Nouveau titre',
+            'description' => 'Description mise à jour',
+            'date_limite' => '2026-11-05',
+            'priorite' => 'elevee',
+            'statut' => 'terminee',
+            'user_id' => $anotherStudent->id,
+        ]);
+
+        $response->assertRedirectToRoute('taches.index')
+            ->assertSessionHas('success', 'La tâche a été mise à jour avec succès.');
+        $this->assertDatabaseHas('taches', [
+            'id' => $tache->id,
+            'user_id' => $student->id,
+            'titre' => 'Nouveau titre',
+            'description' => 'Description mise à jour',
+            'date_limite' => '2026-11-05',
+            'priorite' => 'elevee',
+            'statut' => 'terminee',
+        ]);
+    }
+
+    public function test_invalid_task_updates_are_rejected_without_changing_the_task(): void
+    {
+        $student = User::factory()->create();
+        $tache = Tache::create([
+            'user_id' => $student->id,
+            'titre' => 'Titre conservé',
+            'priorite' => 'moyenne',
+            'statut' => 'a_faire',
+        ]);
+
+        $this->actingAs($student)
+            ->from(route('taches.edit', $tache))
+            ->put(route('taches.update', $tache), [
+                'titre' => '',
+                'priorite' => 'urgente',
+                'statut' => 'inconnu',
+            ])
+            ->assertRedirect(route('taches.edit', $tache))
+            ->assertSessionHasErrors(['titre', 'priorite', 'statut']);
+
+        $this->assertDatabaseHas('taches', [
+            'id' => $tache->id,
+            'titre' => 'Titre conservé',
+            'priorite' => 'moyenne',
+            'statut' => 'a_faire',
+        ]);
+    }
+
+    public function test_a_student_can_delete_their_task_and_its_reminders(): void
+    {
+        $student = User::factory()->create();
+        $tache = Tache::create([
+            'user_id' => $student->id,
+            'titre' => 'Tâche à supprimer',
+            'priorite' => 'moyenne',
+            'statut' => 'a_faire',
+        ]);
+        $rappel = Rappel::create([
+            'tache_id' => $tache->id,
+            'date_heure_rappel' => '2026-10-31 09:00:00',
+        ]);
+
+        $response = $this->actingAs($student)->delete(route('taches.destroy', $tache));
+
+        $response->assertRedirectToRoute('taches.index')
+            ->assertSessionHas('success', 'La tâche a été supprimée avec succès.');
+        $this->assertDatabaseMissing('taches', ['id' => $tache->id]);
+        $this->assertDatabaseMissing('rappels', ['id' => $rappel->id]);
+    }
+
+    public function test_a_student_cannot_edit_update_or_delete_another_students_task(): void
+    {
+        $student = User::factory()->create();
+        $anotherStudent = User::factory()->create();
+        $tache = Tache::create([
+            'user_id' => $anotherStudent->id,
+            'titre' => 'Tâche privée',
+            'priorite' => 'moyenne',
+            'statut' => 'a_faire',
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('taches.edit', $tache))
+            ->assertNotFound();
+
+        $this->put(route('taches.update', $tache), [
+            'titre' => 'Titre falsifié',
+            'priorite' => 'elevee',
+            'statut' => 'terminee',
+        ])->assertNotFound();
+
+        $this->delete(route('taches.destroy', $tache))
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('taches', [
+            'id' => $tache->id,
+            'user_id' => $anotherStudent->id,
+            'titre' => 'Tâche privée',
+            'statut' => 'a_faire',
+        ]);
     }
 }

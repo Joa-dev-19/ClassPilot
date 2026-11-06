@@ -41,14 +41,14 @@
                      aria-labelledby="calendrier-mois">
                 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
                     <a href="{{ route('calendrier.index', ['mois' => $month->subMonth()->format('Y-m')]) }}"
-                       class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                       class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
                         Mois précédent
                     </a>
                     <h2 id="calendrier-mois" class="text-lg font-bold capitalize text-slate-900">
                         {{ $month->locale('fr')->translatedFormat('F Y') }}
                     </h2>
                     <a href="{{ route('calendrier.index', ['mois' => $month->addMonth()->format('Y-m')]) }}"
-                       class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                       class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
                         Mois suivant
                     </a>
                 </div>
@@ -72,6 +72,7 @@
                                 <tr>
                                     @foreach ($semaine as $jour)
                                         @php($tachesDuJour = $tachesParDate->get($jour->toDateString(), collect()))
+                                        @php($devoirsDuJour = $devoirsParDate->get($jour->toDateString(), collect()))
                                         <td class="h-28 border-b border-r border-slate-100 p-2 align-top {{ $jour->month !== $month->month ? 'bg-slate-50 text-slate-400' : 'text-slate-800' }}">
                                             <time datetime="{{ $jour->toDateString() }}"
                                                   class="text-sm font-semibold">
@@ -83,6 +84,18 @@
                                                     {{ $tache->titre }}
                                                 </a>
                                             @endforeach
+                                            @foreach ($devoirsDuJour->take(2) as $devoir)
+                                                <a href="{{ route('devoirs.etudiants.show', $devoir) }}"
+                                                   class="mt-1 block truncate rounded-md bg-amber-50 px-2 py-1 text-xs text-amber-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700"
+                                                   title="Devoir : {{ $devoir->titre }}">
+                                                    Devoir : {{ $devoir->titre }}
+                                                </a>
+                                            @endforeach
+                                            @if ($devoirsDuJour->count() > 2)
+                                                <p class="mt-1 text-xs text-slate-600">
+                                                    {{ $devoirsDuJour->count() - 2 }} autre{{ $devoirsDuJour->count() > 3 ? 's' : '' }} devoir{{ $devoirsDuJour->count() > 3 ? 's' : '' }}
+                                                </p>
+                                            @endif
                                             @if ($tachesDuJour->count() > 2)
                                                 <p class="mt-1 text-xs text-slate-600">
                                                     {{ $tachesDuJour->count() - 2 }} autre{{ $tachesDuJour->count() > 3 ? 's' : '' }}
@@ -146,6 +159,31 @@
                 </section>
             </div>
 
+            <section class="mb-8 rounded-2xl border border-amber-200 bg-white p-5 shadow-sm sm:p-6"
+                     aria-labelledby="devoirs-du-mois">
+                <h2 id="devoirs-du-mois" class="text-lg font-bold text-slate-900">
+                    Devoirs publiés ce mois-ci
+                </h2>
+                @if ($devoirsDuMois->isEmpty())
+                    <p class="mt-4 text-sm text-slate-600">Aucun devoir publié avec une échéance ce mois-ci.</p>
+                @else
+                    <ul class="mt-4 flex flex-col gap-3">
+                        @foreach ($devoirsDuMois as $devoir)
+                            <li class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 p-3">
+                                <a href="{{ route('devoirs.etudiants.show', $devoir) }}"
+                                   class="font-medium text-blue-800 underline hover:text-blue-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+                                    {{ $devoir->titre }}
+                                </a>
+                                <time datetime="{{ $devoir->date_limite->toDateString() }}"
+                                      class="text-sm text-slate-600">
+                                    {{ $devoir->date_limite->format('d/m/Y') }}
+                                </time>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </section>
+
             <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
                      aria-labelledby="taches-du-mois">
                 <h2 id="taches-du-mois" class="text-lg font-bold text-slate-900">
@@ -187,13 +225,13 @@
                                                 <input id="rappel-{{ $tache->id }}"
                                                        name="date_heure_rappel"
                                                        type="datetime-local"
-                                                       min="{{ now()->format('Y-m-d\TH:i') }}"
+                                                       min="{{ now()->addMinute()->format('Y-m-d\TH:i') }}"
                                                        max="{{ \Carbon\Carbon::parse($tache->date_limite)->endOfDay()->format('Y-m-d\TH:i') }}"
                                                        required
                                                        class="mt-1 block rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                             </div>
                                             <button type="submit"
-                                                    class="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                                                    class="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
                                                 Programmer
                                             </button>
                                         </form>
@@ -206,7 +244,11 @@
                                             <li class="flex flex-wrap items-center gap-3 text-sm text-slate-600">
                                                 <span>
                                                     Rappel du {{ $rappel->date_heure_rappel->format('d/m/Y à H:i') }}
-                                                    · {{ $rappel->statut === \App\Models\Rappel::STATUS_SENT ? 'Envoyé' : 'En attente' }}
+                                                    · {{ match ($rappel->statut) {
+                                                        \App\Models\Rappel::STATUS_SENT => 'Envoyé',
+                                                        \App\Models\Rappel::STATUS_FAILED => 'Échec après '.$rappel->tentatives.' tentative'.($rappel->tentatives === 1 ? '' : 's'),
+                                                        default => 'En attente',
+                                                    } }}
                                                 </span>
                                                 @if ($rappel->statut === \App\Models\Rappel::STATUS_PENDING)
                                                     <form method="POST"
@@ -214,7 +256,7 @@
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"
-                                                                class="font-semibold text-red-700 underline hover:text-red-900">
+                                                                class="font-semibold text-red-700 underline hover:text-red-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
                                                             Annuler le rappel
                                                         </button>
                                                     </form>
