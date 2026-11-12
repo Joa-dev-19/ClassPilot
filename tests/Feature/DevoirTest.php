@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Devoir;
+use App\Models\Filiere;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,6 +15,8 @@ class DevoirTest extends TestCase
     public function test_a_teacher_can_open_the_draft_creation_form(): void
     {
         $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+        $filiere = Filiere::query()->create(['nom' => 'Sciences']);
+        $filiere->classes()->create(['nom' => 'Terminale A']);
 
         $this->actingAs($teacher)
             ->get(route('devoirs.create'))
@@ -21,7 +24,9 @@ class DevoirTest extends TestCase
             ->assertSee('Créer un devoir')
             ->assertSee('name="titre"', false)
             ->assertSee('name="consignes"', false)
-            ->assertSee('name="date_limite"', false);
+            ->assertSee('name="date_limite"', false)
+            ->assertSee('name="classe_id"', false)
+            ->assertSee('Terminale A · Sciences');
     }
 
     public function test_a_teacher_can_create_a_draft_owned_by_the_authenticated_teacher(): void
@@ -62,6 +67,99 @@ class DevoirTest extends TestCase
             ])
             ->assertRedirect(route('devoirs.create'))
             ->assertSessionHasErrors(['titre', 'date_limite']);
+
+        $this->assertDatabaseCount('devoirs', 0);
+    }
+
+    public function test_a_teacher_can_create_a_draft_for_a_selected_class(): void
+    {
+        $this->travelTo('2026-10-30 10:00:00');
+        $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+        $filiere = Filiere::query()->create(['nom' => 'Lettres']);
+        $classe = $filiere->classes()->create(['nom' => 'Première A']);
+
+        $response = $this->actingAs($teacher)->post(route('devoirs.store'), [
+            'titre' => 'Commentaire composé',
+            'consignes' => 'Étudier le texte.',
+            'date_limite' => '2026-11-06',
+            'classe_id' => $classe->id,
+        ]);
+        $devoir = Devoir::query()->sole();
+
+        $response->assertRedirectToRoute('devoirs.show', $devoir)
+            ->assertSessionHas('success', 'Le devoir a été enregistré en brouillon.');
+
+        $this->assertDatabaseHas('devoirs', [
+            'id' => $devoir->id,
+            'enseignant_id' => $teacher->id,
+            'titre' => 'Commentaire composé',
+            'classe_id' => $classe->id,
+            'statut' => Devoir::STATUS_DRAFT,
+        ]);
+    }
+
+    public function test_a_teacher_cannot_assign_a_devoir_to_a_nonexistent_class(): void
+    {
+        $this->travelTo('2026-10-30 10:00:00');
+        $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+
+        $this->actingAs($teacher)
+            ->from(route('devoirs.create'))
+            ->post(route('devoirs.store'), [
+                'titre' => 'Devoir invalide',
+                'date_limite' => '2026-11-06',
+                'classe_id' => 999,
+            ])
+            ->assertRedirect(route('devoirs.create'))
+            ->assertSessionHasErrors('classe_id');
+
+        $this->assertDatabaseCount('devoirs', 0);
+    }
+
+    public function test_a_teacher_can_publish_a_draft_for_a_selected_filiere(): void
+    {
+        $this->travelTo('2026-10-30 10:00:00');
+        $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+        $filiere = Filiere::query()->create(['nom' => 'Sciences']);
+        $devoir = $teacher->devoirs()->create([
+            'titre' => 'Devoir de filière',
+            'consignes' => 'Répondre aux questions.',
+            'date_limite' => '2026-11-06',
+            'filiere_id' => $filiere->id,
+            'statut' => Devoir::STATUS_DRAFT,
+        ]);
+
+        $this->actingAs($teacher)
+            ->post(route('devoirs.publish', $devoir))
+            ->assertRedirectToRoute('devoirs.show', $devoir)
+            ->assertSessionHas('success', 'Le devoir a été publié pour la filière sélectionnée.');
+
+        $this->assertDatabaseHas('devoirs', [
+            'id' => $devoir->id,
+            'filiere_id' => $filiere->id,
+            'classe_id' => null,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+    }
+
+    public function test_a_teacher_cannot_target_a_filiere_and_a_class_at_the_same_time(): void
+    {
+        $this->travelTo('2026-10-30 10:00:00');
+        $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+        $filiere = Filiere::query()->create(['nom' => 'Sciences']);
+        $classe = $filiere->classes()->create(['nom' => 'Terminale A']);
+
+        $this->actingAs($teacher)
+            ->from(route('devoirs.create'))
+            ->post(route('devoirs.store'), [
+                'titre' => 'Devoir à audience ambiguë',
+                'consignes' => 'Consignes.',
+                'date_limite' => '2026-11-06',
+                'filiere_id' => $filiere->id,
+                'classe_id' => $classe->id,
+            ])
+            ->assertRedirect(route('devoirs.create'))
+            ->assertSessionHasErrors('classe_id');
 
         $this->assertDatabaseCount('devoirs', 0);
     }
@@ -288,12 +386,39 @@ class DevoirTest extends TestCase
     public function test_published_devoir_deadlines_are_displayed_in_the_student_calendar(): void
     {
         $this->travelTo('2026-10-30 10:00:00');
-        $student = User::factory()->create();
+        $filiere = Filiere::query()->create(['nom' => 'Sciences']);
+        $classeA = $filiere->classes()->create(['nom' => 'Terminale A']);
+        $classeB = $filiere->classes()->create(['nom' => 'Terminale B']);
+        $anotherFiliere = Filiere::query()->create(['nom' => 'Lettres']);
+        $anotherFiliere->classes()->create(['nom' => 'Première L']);
+        $student = User::factory()->create(['classe_id' => $classeA->id]);
         $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
         $teacher->devoirs()->create([
             'titre' => 'Devoir visible au calendrier',
             'consignes' => 'Consignes.',
             'date_limite' => '2026-10-31',
+            'classe_id' => $classeA->id,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+        $teacher->devoirs()->create([
+            'titre' => 'Devoir d’une autre classe au calendrier',
+            'consignes' => 'Consignes privées.',
+            'date_limite' => '2026-10-31',
+            'classe_id' => $classeB->id,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+        $teacher->devoirs()->create([
+            'titre' => 'Devoir d’une autre filière au calendrier',
+            'consignes' => 'Consignes privées.',
+            'date_limite' => '2026-10-31',
+            'filiere_id' => $anotherFiliere->id,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+        $teacher->devoirs()->create([
+            'titre' => 'Devoir de filière visible au calendrier',
+            'consignes' => 'Consignes communes de la filière.',
+            'date_limite' => '2026-10-31',
+            'filiere_id' => $filiere->id,
             'statut' => Devoir::STATUS_PUBLISHED,
         ]);
         $teacher->devoirs()->create([
@@ -307,6 +432,9 @@ class DevoirTest extends TestCase
             ->get(route('calendrier.index', ['mois' => '2026-10']))
             ->assertOk()
             ->assertSee('Devoir visible au calendrier')
+            ->assertDontSee('Devoir d’une autre classe au calendrier')
+            ->assertDontSee('Devoir d’une autre filière au calendrier')
+            ->assertSee('Devoir de filière visible au calendrier')
             ->assertDontSee('Brouillon invisible au calendrier');
     }
 }

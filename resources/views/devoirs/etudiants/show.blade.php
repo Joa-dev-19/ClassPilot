@@ -7,6 +7,15 @@
                     Publié par {{ $devoir->enseignant->name }}
                     · Date limite : {{ $devoir->date_limite->format('d/m/Y') }}
                 </p>
+                @if ($devoir->classe)
+                    <p class="mt-1 text-sm text-slate-600">
+                        Classe : {{ $devoir->classe->nom }} · {{ $devoir->classe->filiere->nom }}
+                    </p>
+                @elseif ($devoir->filiere)
+                    <p class="mt-1 text-sm text-slate-600">
+                        Filière : {{ $devoir->filiere->nom }}
+                    </p>
+                @endif
 
                 <section class="mt-6" aria-labelledby="consignes-devoir">
                     <h2 id="consignes-devoir" class="font-semibold text-slate-900">Consignes</h2>

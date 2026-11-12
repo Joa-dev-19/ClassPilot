@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Devoir;
+use App\Models\Filiere;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -128,6 +129,98 @@ class DevoirAccessTest extends TestCase
         $this->get(route('devoirs.etudiants.show', $published))
             ->assertOk()
             ->assertSee('Répondre aux questions.');
+    }
+
+    public function test_students_only_see_devoirs_targeted_to_their_class_or_everyone(): void
+    {
+        $filiere = Filiere::query()->create(['nom' => 'Sciences']);
+        $classeA = $filiere->classes()->create(['nom' => 'Terminale A']);
+        $classeB = $filiere->classes()->create(['nom' => 'Terminale B']);
+        $student = User::factory()->create(['classe_id' => $classeA->id]);
+        $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+        $targetedToA = $teacher->devoirs()->create([
+            'titre' => 'Devoir de Terminale A',
+            'consignes' => 'Consignes A.',
+            'date_limite' => '2026-11-06',
+            'classe_id' => $classeA->id,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+        $teacher->devoirs()->create([
+            'titre' => 'Devoir de Terminale B',
+            'consignes' => 'Consignes B.',
+            'date_limite' => '2026-11-06',
+            'classe_id' => $classeB->id,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+        $teacher->devoirs()->create([
+            'titre' => 'Devoir général',
+            'consignes' => 'Consignes communes.',
+            'date_limite' => '2026-11-06',
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('devoirs.etudiants.index'))
+            ->assertOk()
+            ->assertSee('Devoir de Terminale A')
+            ->assertSee('Devoir général')
+            ->assertDontSee('Devoir de Terminale B');
+
+        $this->get(route('devoirs.etudiants.show', $targetedToA))
+            ->assertOk()
+            ->assertSee('Consignes A.');
+    }
+
+    public function test_a_student_from_another_class_cannot_open_a_class_targeted_devoir(): void
+    {
+        $filiere = Filiere::query()->create(['nom' => 'Sciences']);
+        $classeA = $filiere->classes()->create(['nom' => 'Terminale A']);
+        $classeB = $filiere->classes()->create(['nom' => 'Terminale B']);
+        $student = User::factory()->create(['classe_id' => $classeB->id]);
+        $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+        $devoir = $teacher->devoirs()->create([
+            'titre' => 'Devoir privé à une classe',
+            'consignes' => 'Consignes privées.',
+            'date_limite' => '2026-11-06',
+            'classe_id' => $classeA->id,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('devoirs.etudiants.show', $devoir))
+            ->assertNotFound();
+    }
+
+    public function test_students_only_see_devoirs_targeted_to_their_filiere(): void
+    {
+        $sciences = Filiere::query()->create(['nom' => 'Sciences']);
+        $letters = Filiere::query()->create(['nom' => 'Lettres']);
+        $classe = $sciences->classes()->create(['nom' => 'Terminale A']);
+        $student = User::factory()->create(['classe_id' => $classe->id]);
+        $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+        $teacher->devoirs()->create([
+            'titre' => 'Devoir pour la filière Sciences',
+            'consignes' => 'Consignes communes.',
+            'date_limite' => '2026-11-06',
+            'filiere_id' => $sciences->id,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+        $devoirHorsFiliere = $teacher->devoirs()->create([
+            'titre' => 'Devoir pour la filière Lettres',
+            'consignes' => 'Consignes différentes.',
+            'date_limite' => '2026-11-06',
+            'filiere_id' => $letters->id,
+            'statut' => Devoir::STATUS_PUBLISHED,
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('devoirs.etudiants.index'))
+            ->assertOk()
+            ->assertSee('Devoir pour la filière Sciences')
+            ->assertDontSee('Devoir pour la filière Lettres');
+
+        $this->get(route('devoirs.etudiants.show', $devoirHorsFiliere))
+            ->assertNotFound();
     }
 
     public function test_students_cannot_open_a_draft_or_archived_devoir(): void

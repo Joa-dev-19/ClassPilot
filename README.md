@@ -7,10 +7,10 @@ ClassPilot est une application web qui aide les élèves et les étudiants à or
 - **Comptes et accès :** inscription étudiante, connexion, vérification de l’adresse e-mail et gestion du profil.
 - **Tâches personnelles :** création, consultation, modification et suppression des tâches.
 - **Calendrier et rappels :** calendrier des échéances et rappels par courriel programmés par l’étudiant.
-- **Devoirs enseignants :** création en brouillon, publication pour tous les étudiants, modification et archivage. Les échéances des devoirs publiés apparaissent dans le calendrier étudiant.
-- **Administration :** recherche et consultation des comptes, activation et désactivation réservées aux administrateurs.
+- **Devoirs enseignants :** création en brouillon, publication pour tous les étudiants, une filière ou une classe, modification et archivage. Les échéances visibles apparaissent dans le calendrier étudiant.
+- **Administration :** recherche et consultation des comptes, activation/désactivation, gestion des filières et classes, et rattachement des étudiants.
 
-Les devoirs ne prennent pas encore en charge les classes, les groupes, le dépôt de travaux ou les notes.
+Les devoirs ne gèrent pas encore les groupes, le dépôt de travaux ou les notes.
 
 ## Prérequis
 

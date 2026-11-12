@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Filiere;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -189,6 +190,67 @@ class UtilisateurTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id' => $administrator->id,
             'statut' => User::STATUS_ACTIVE,
+        ]);
+    }
+
+    public function test_an_administrator_can_assign_a_student_to_a_class(): void
+    {
+        $administrator = User::factory()->create(['role' => User::ROLE_ADMINISTRATOR]);
+        $student = User::factory()->create();
+        $filiere = Filiere::query()->create(['nom' => 'Sciences']);
+        $classe = $filiere->classes()->create(['nom' => 'Terminale A']);
+
+        $this->actingAs($administrator)
+            ->get(route('admin.utilisateurs.show', $student))
+            ->assertOk()
+            ->assertSee('Rattacher l’étudiant à une classe')
+            ->assertSee('Terminale A · Sciences');
+
+        $this->patch(route('admin.utilisateurs.classe.update', $student), [
+            'classe_id' => $classe->id,
+        ])
+            ->assertRedirectToRoute('admin.utilisateurs.show', $student)
+            ->assertSessionHas('success', 'Le rattachement à la classe a été mis à jour.');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $student->id,
+            'classe_id' => $classe->id,
+        ]);
+    }
+
+    public function test_a_student_cannot_be_assigned_to_a_nonexistent_class(): void
+    {
+        $administrator = User::factory()->create(['role' => User::ROLE_ADMINISTRATOR]);
+        $student = User::factory()->create();
+
+        $this->actingAs($administrator)
+            ->from(route('admin.utilisateurs.show', $student))
+            ->patch(route('admin.utilisateurs.classe.update', $student), ['classe_id' => 999])
+            ->assertRedirect(route('admin.utilisateurs.show', $student))
+            ->assertSessionHasErrors('classe_id');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $student->id,
+            'classe_id' => null,
+        ]);
+    }
+
+    public function test_a_class_cannot_be_assigned_to_a_non_student_account(): void
+    {
+        $administrator = User::factory()->create(['role' => User::ROLE_ADMINISTRATOR]);
+        $teacher = User::factory()->create(['role' => User::ROLE_TEACHER]);
+        $filiere = Filiere::query()->create(['nom' => 'Sciences']);
+        $classe = $filiere->classes()->create(['nom' => 'Terminale A']);
+
+        $this->actingAs($administrator)
+            ->patch(route('admin.utilisateurs.classe.update', $teacher), [
+                'classe_id' => $classe->id,
+            ])
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $teacher->id,
+            'classe_id' => null,
         ]);
     }
 }

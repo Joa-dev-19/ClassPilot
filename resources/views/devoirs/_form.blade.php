@@ -44,6 +44,47 @@
         @enderror
     </div>
 
+    <div>
+        <label for="filiere_id" class="mb-2 block font-medium text-slate-700">Filière destinataire (facultatif)</label>
+        <select id="filiere_id" name="filiere_id"
+                aria-invalid="@error('filiere_id') true @else false @enderror"
+                aria-describedby="@error('filiere_id') filiere-error @enderror"
+                class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+            <option value="">Toutes les filières</option>
+            @foreach ($filieres as $filiere)
+                <option value="{{ $filiere->id }}"
+                    @selected((string) old('filiere_id', $devoir?->filiere_id) === (string) $filiere->id)>
+                    {{ $filiere->nom }}
+                </option>
+            @endforeach
+        </select>
+        @error('filiere_id')
+            <p id="filiere-error" class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div>
+        <label for="classe_id" class="mb-2 block font-medium text-slate-700">Classe destinataire (facultatif)</label>
+        <select id="classe_id" name="classe_id"
+                aria-invalid="@error('classe_id') true @else false @enderror"
+                aria-describedby="@error('classe_id') classe-error @enderror"
+                class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+            <option value="">Tous les étudiants</option>
+            @foreach ($classes as $classe)
+                <option value="{{ $classe->id }}"
+                    @selected((string) old('classe_id', $devoir?->classe_id) === (string) $classe->id)>
+                    {{ $classe->nom }} · {{ $classe->filiere->nom }}
+                </option>
+            @endforeach
+        </select>
+        @error('classe_id')
+            <p id="classe-error" class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+        <p class="mt-1 text-sm text-slate-500">
+            Choisis au plus une filière ou une classe. Si aucune n’est choisie, le devoir sera visible par tous les étudiants.
+        </p>
+    </div>
+
     <div class="flex flex-wrap gap-3">
         <button type="submit"
                 class="rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">

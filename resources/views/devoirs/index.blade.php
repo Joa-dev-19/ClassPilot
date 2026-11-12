@@ -47,6 +47,12 @@
                                     <p class="mt-2 text-sm text-slate-600">
                                         Date limite : {{ $devoir->date_limite->format('d/m/Y') }}
                                     </p>
+                                    <p class="mt-1 text-sm text-slate-600">
+                                        Destinataires :
+                                        {{ $devoir->classe
+                                            ? $devoir->classe->nom.' · '.$devoir->classe->filiere->nom
+                                            : ($devoir->filiere?->nom ?? 'Tous les étudiants') }}
+                                    </p>
                                 </div>
                                 <span @class([
                                     'rounded-full px-3 py-1 text-sm font-semibold',

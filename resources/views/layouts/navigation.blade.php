@@ -31,7 +31,10 @@
                         </x-nav-link>
                     @elseif (Auth::user()->role === \App\Models\User::ROLE_ADMINISTRATOR)
                         <x-nav-link :href="route('admin.utilisateurs.index')" :active="request()->routeIs('admin.utilisateurs.*')">
-                            Administration
+                            Comptes
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.filieres.index')" :active="request()->routeIs('admin.filieres.*', 'admin.classes.*')">
+                            Classes et filières
                         </x-nav-link>
                     @endif
                 </div>
@@ -103,7 +106,10 @@
                 </x-responsive-nav-link>
             @elseif (Auth::user()->role === \App\Models\User::ROLE_ADMINISTRATOR)
                 <x-responsive-nav-link :href="route('admin.utilisateurs.index')" :active="request()->routeIs('admin.utilisateurs.*')">
-                    Administration
+                    Comptes
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.filieres.index')" :active="request()->routeIs('admin.filieres.*', 'admin.classes.*')">
+                    Classes et filières
                 </x-responsive-nav-link>
             @endif
         </div>

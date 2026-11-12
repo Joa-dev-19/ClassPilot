@@ -7,6 +7,11 @@
 
     <div class="py-12">
         <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('admin.filieres.index') }}"
+               class="w-fit rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                Gérer les classes et filières
+            </a>
+
             @if (session('success'))
                 <p role="status" class="rounded-xl border border-green-200 bg-green-50 p-4 text-green-800">
                     {{ session('success') }}
@@ -65,6 +70,7 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Nom</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Adresse e-mail</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Rôle</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Classe / filière</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Statut</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Créé le</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Action</th>
@@ -78,6 +84,13 @@
                                         </th>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-700">{{ $user->email }}</td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-700">{{ $user->role }}</td>
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-700">
+                                            @if ($user->classe)
+                                                {{ $user->classe->nom }} · {{ $user->classe->filiere->nom }}
+                                            @else
+                                                <span class="text-slate-500">Non rattaché</span>
+                                            @endif
+                                        </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-700">
                                             {{ $user->statut === \App\Models\User::STATUS_ACTIVE ? 'Actif' : 'Désactivé' }}
                                         </td>

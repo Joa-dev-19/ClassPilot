@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Classe;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,6 +25,7 @@ class UtilisateurController extends Controller
         'email',
         'role',
         'statut',
+        'classe_id',
         'email_verified_at',
         'created_at',
     ];
@@ -36,7 +38,8 @@ class UtilisateurController extends Controller
         $search = trim($validated['q'] ?? '');
 
         $usersQuery = User::query()
-            ->select(['id', 'name', 'email', 'role', 'statut', 'created_at'])
+            ->select(['id', 'name', 'email', 'role', 'statut', 'classe_id', 'created_at'])
+            ->with('classe.filiere')
             ->orderBy('name')
             ->orderBy('id');
 
@@ -57,9 +60,29 @@ class UtilisateurController extends Controller
     {
         $user = User::query()
             ->select(self::SAFE_COLUMNS)
+            ->with('classe.filiere')
             ->findOrFail($user->getKey());
 
-        return view('admin.utilisateurs.show', ['user' => $user]);
+        return view('admin.utilisateurs.show', [
+            'user' => $user,
+            'classes' => Classe::query()->with('filiere')->orderBy('nom')->get(),
+        ]);
+    }
+
+    public function updateClasse(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($user->role === User::ROLE_STUDENT, 404);
+
+        $validated = $request->validate([
+            'classe_id' => ['nullable', 'integer', 'exists:classes,id'],
+        ]);
+
+        $user->classe()->associate($validated['classe_id'] ?? null);
+        $user->save();
+
+        return redirect()
+            ->route('admin.utilisateurs.show', $user)
+            ->with('success', 'Le rattachement à la classe a été mis à jour.');
     }
 
     public function activate(User $user): RedirectResponse

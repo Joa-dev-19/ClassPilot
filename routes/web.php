@@ -1,6 +1,8 @@
 
 <?php
 
+use App\Http\Controllers\Admin\ClasseController;
+use App\Http\Controllers\Admin\FiliereController;
 use App\Http\Controllers\Admin\UtilisateurController;
 use App\Http\Controllers\CalendrierController;
 use App\Http\Controllers\DevoirController;
@@ -89,6 +91,22 @@ Route::middleware(['auth', 'account.active', 'verified', 'role:administrateur'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/filieres', [FiliereController::class, 'index'])
+            ->name('filieres.index');
+
+        Route::post('/filieres', [FiliereController::class, 'store'])
+            ->name('filieres.store');
+
+        Route::put('/filieres/{filiere}', [FiliereController::class, 'update'])
+            ->name('filieres.update');
+
+        Route::post('/filieres/{filiere}/classes', [ClasseController::class, 'store'])
+            ->name('classes.store');
+
+        Route::put('/filieres/{filiere}/classes/{classe}', [ClasseController::class, 'update'])
+            ->scopeBindings()
+            ->name('classes.update');
+
         Route::get('/utilisateurs', [UtilisateurController::class, 'index'])
             ->name('utilisateurs.index');
 
@@ -100,6 +118,9 @@ Route::middleware(['auth', 'account.active', 'verified', 'role:administrateur'])
 
         Route::patch('/utilisateurs/{user}/desactiver', [UtilisateurController::class, 'deactivate'])
             ->name('utilisateurs.deactivate');
+
+        Route::patch('/utilisateurs/{user}/classe', [UtilisateurController::class, 'updateClasse'])
+            ->name('utilisateurs.classe.update');
     });
 
 require __DIR__.'/auth.php';

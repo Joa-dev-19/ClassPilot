@@ -39,8 +39,10 @@ class CalendrierController extends Controller
 
         $devoirsDuMois = Devoir::query()
             ->where('statut', Devoir::STATUS_PUBLISHED)
+            ->visibleToStudent($request->user())
             ->whereDate('date_limite', '>=', $start->toDateString())
             ->whereDate('date_limite', '<=', $end->toDateString())
+            ->with(['classe.filiere', 'filiere'])
             ->orderBy('date_limite')
             ->get();
 

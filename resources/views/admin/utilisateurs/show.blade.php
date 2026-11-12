@@ -45,7 +45,51 @@
                         <dt class="text-sm font-medium text-slate-600">Date de création</dt>
                         <dd class="mt-1 text-slate-900">{{ $user->created_at->format('d/m/Y à H:i') }}</dd>
                     </div>
+                    @if ($user->role === \App\Models\User::ROLE_STUDENT)
+                        <div>
+                            <dt class="text-sm font-medium text-slate-600">Classe / filière</dt>
+                            <dd class="mt-1 text-slate-900">
+                                @if ($user->classe)
+                                    {{ $user->classe->nom }} · {{ $user->classe->filiere->nom }}
+                                @else
+                                    Non rattaché
+                                @endif
+                            </dd>
+                        </div>
+                    @endif
                 </dl>
+
+                @if ($user->role === \App\Models\User::ROLE_STUDENT)
+                    <form action="{{ route('admin.utilisateurs.classe.update', $user) }}" method="POST"
+                          class="flex flex-col gap-4 border-t border-slate-200 pt-6">
+                        @csrf
+                        @method('PATCH')
+                        <div>
+                            <label for="classe_id" class="mb-2 block font-medium text-slate-700">
+                                Rattacher l’étudiant à une classe
+                            </label>
+                            <select id="classe_id" name="classe_id"
+                                    aria-invalid="@error('classe_id') true @else false @enderror"
+                                    aria-describedby="@error('classe_id') classe-error @enderror"
+                                    class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Aucune classe</option>
+                                @foreach ($classes as $classe)
+                                    <option value="{{ $classe->id }}"
+                                        @selected((string) old('classe_id', $user->classe_id) === (string) $classe->id)>
+                                        {{ $classe->nom }} · {{ $classe->filiere->nom }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('classe_id')
+                                <p id="classe-error" role="alert" class="mt-1 text-sm text-red-700">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <button type="submit"
+                                class="w-fit rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                            Enregistrer la classe
+                        </button>
+                    </form>
+                @endif
 
                 @error('statut')
                     <p role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
