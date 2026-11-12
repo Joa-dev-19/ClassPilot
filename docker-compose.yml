@@ -1,0 +1,94 @@
+services:
+  app:
+    build:
+      context: .
+      target: app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment: &app-environment
+      APP_NAME: ${APP_NAME:-ClassPilot}
+      APP_ENV: production
+      APP_KEY: ${APP_KEY:?Set APP_KEY in .env}
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Paris}
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-classpilot}
+      DB_USERNAME: ${DB_USERNAME:-classpilot}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      MAIL_SCHEME: ${MAIL_SCHEME:-smtp}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-ClassPilot}
+    volumes:
+      - app-storage:/var/www/html/storage
+    command:
+      - sh
+      - -c
+      - php artisan storage:link --force && exec apache2-foreground
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-classpilot}
+      MYSQL_USER: ${DB_USERNAME:-classpilot}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping --host=127.0.0.1 --user=root --password=\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  scheduler:
+    build:
+      context: .
+      target: app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment: *app-environment
+    volumes:
+      - app-storage:/var/www/html/storage
+    command: ["php", "artisan", "schedule:work"]
+
+  migrate:
+    build:
+      context: .
+      target: app
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment: *app-environment
+    command: ["php", "artisan", "migrate", "--force"]
+
+volumes:
+  app-storage:
+  mysql-data:

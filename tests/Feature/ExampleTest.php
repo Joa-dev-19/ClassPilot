@@ -16,7 +16,7 @@ class ExampleTest extends TestCase
 
         $response->assertOk()
             ->assertSee('ClassPilot')
-            ->assertSee('Avance dans tes études, une tâche à la fois.')
+            ->assertSee('Une tête plus légère. Des études mieux organisées.')
             ->assertSee('Créer mon compte étudiant');
     }
 }

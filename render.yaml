@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: classpilot-demo
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: >-
+      /bin/sh -c "mkdir -p storage/app && touch storage/app/classpilot.sqlite &&
+      chown www-data:www-data storage/app/classpilot.sqlite &&
+      su -s /bin/sh www-data -c 'php artisan migrate --force' &&
+      (su -s /bin/sh www-data -c 'php artisan schedule:work' &
+      exec apache2-foreground)"
+    healthCheckPath: /up
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        value: https://classpilot-demo.onrender.com
+      - key: ASSET_URL
+        value: https://classpilot-demo.onrender.com
+      - key: APP_TIMEZONE
+        value: Europe/Paris
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/html/storage/app/classpilot.sqlite
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_SCHEME
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: ClassPilot
+      - key: PORT
+        value: "80"

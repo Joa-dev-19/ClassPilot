@@ -1,9 +1,9 @@
 <x-guest-layout>
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Confirme ton mot de passe</h1>
+        <h1 class="cp-heading text-3xl">Confirme ton mot de passe</h1>
     </div>
 
-    <div class="mb-4 text-sm text-gray-600">
+    <div class="mb-4 text-sm leading-6 text-slate-600">
         Cette zone est protégée. Confirme ton mot de passe pour continuer.
     </div>
 

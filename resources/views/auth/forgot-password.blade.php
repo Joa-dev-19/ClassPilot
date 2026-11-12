@@ -1,9 +1,9 @@
 <x-guest-layout>
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Réinitialiser le mot de passe</h1>
+        <h1 class="cp-heading text-3xl">Réinitialiser le mot de passe</h1>
     </div>
 
-    <div class="mb-4 text-sm text-gray-600">
+    <div class="mb-4 text-sm leading-6 text-slate-600">
         Indique l’adresse e-mail associée à ton compte. Si elle existe, nous t’enverrons un lien pour choisir un nouveau mot de passe.
     </div>
 
@@ -19,7 +19,7 @@
         </div>
 
         <div class="mt-6 flex items-center justify-between gap-4">
-            <a class="text-sm text-gray-600 underline hover:text-gray-900" href="{{ route('login') }}">
+            <a class="text-sm text-slate-600 underline decoration-transparent underline-offset-4 hover:text-slate-900 hover:decoration-current" href="{{ route('login') }}">
                 Retour à la connexion
             </a>
             <x-primary-button>

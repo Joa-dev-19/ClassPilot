@@ -1,27 +1,27 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+        <h2 class="cp-heading text-xl">
             Gestion des classes et filières
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:px-8">
+    <div class="cp-page">
+        <div class="cp-page-inner flex max-w-7xl flex-col gap-6">
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('admin.utilisateurs.index') }}"
-                   class="w-fit rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                   class="cp-button-secondary w-full sm:w-fit">
                     Gestion des comptes
                 </a>
             </div>
 
             @if (session('success'))
-                <p role="status" class="rounded-xl border border-green-200 bg-green-50 p-4 text-green-800">
+                <p role="status" class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
                     {{ session('success') }}
                 </p>
             @endif
 
             @if ($errors->any())
-                <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
+                <div role="alert" class="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-800">
                     <ul class="list-inside list-disc">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -30,7 +30,7 @@
                 </div>
             @endif
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section class="cp-card flex flex-col gap-2 p-5 sm:p-6">
                 <h3 class="text-lg font-semibold text-slate-900">Créer une filière</h3>
                 <form action="{{ route('admin.filieres.store') }}" method="POST"
                       class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -40,23 +40,23 @@
                             Nom de la filière
                         </label>
                         <input id="nouvelle-filiere" name="nom" type="text" required maxlength="100"
-                               class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+                               class="w-full rounded-xl border-slate-300 bg-white focus:border-emerald-600 focus:ring-emerald-600">
                     </div>
                     <button type="submit"
-                            class="rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                            class="cp-button-primary w-full sm:w-auto">
                         Ajouter la filière
                     </button>
                 </form>
             </section>
 
             @if ($filieres->isEmpty())
-                <p class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-700">
+                <p class="cp-card p-6 text-slate-700">
                     Aucune filière n’a été créée.
                 </p>
             @else
                 <section class="flex flex-col gap-6" aria-label="Filières et classes">
                     @foreach ($filieres as $filiere)
-                        <article class="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <article class="cp-card flex flex-col gap-5 p-5 sm:p-6">
                             <form action="{{ route('admin.filieres.update', $filiere) }}" method="POST"
                                   class="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end">
                                 @csrf
@@ -67,10 +67,10 @@
                                     </label>
                                     <input id="filiere-{{ $filiere->id }}" name="nom" type="text" required maxlength="100"
                                            value="{{ $filiere->nom }}"
-                                           class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+                                           class="w-full rounded-xl border-slate-300 bg-white focus:border-emerald-600 focus:ring-emerald-600">
                                 </div>
                                 <button type="submit"
-                                        class="rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                                        class="cp-button-secondary w-full sm:w-auto">
                                     Renommer
                                 </button>
                             </form>
@@ -94,13 +94,13 @@
                                                         </label>
                                                         <input id="classe-{{ $classe->id }}" name="nom" type="text" required maxlength="100"
                                                                value="{{ $classe->nom }}"
-                                                               class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+                                                               class="w-full rounded-xl border-slate-300 bg-white focus:border-emerald-600 focus:ring-emerald-600">
                                                     </div>
                                                     <p class="text-sm text-slate-600">
                                                         {{ $classe->etudiants_count }} étudiant(s) · {{ $classe->devoirs_count }} devoir(s)
                                                     </p>
                                                     <button type="submit"
-                                                            class="rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                                                            class="cp-button-secondary w-full sm:w-auto">
                                                         Renommer
                                                     </button>
                                                 </form>
@@ -118,10 +118,10 @@
                                         Nouvelle classe
                                     </label>
                                     <input id="nouvelle-classe-{{ $filiere->id }}" name="nom" type="text" required maxlength="100"
-                                           class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+                                           class="w-full rounded-xl border-slate-300 bg-white focus:border-emerald-600 focus:ring-emerald-600">
                                 </div>
                                 <button type="submit"
-                                        class="rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                                        class="cp-button-primary w-full sm:w-auto">
                                     Ajouter la classe
                                 </button>
                             </form>

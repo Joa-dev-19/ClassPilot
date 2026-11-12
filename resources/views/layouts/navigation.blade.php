@@ -1,17 +1,15 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+<nav x-data="{ open: false }" class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex min-h-[4.5rem] items-center justify-between gap-4">
+            <div class="flex min-w-0 items-center gap-8">
+                <div class="flex shrink-0 items-center">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-xl focus-visible:ring-2 focus-visible:ring-emerald-600">
+                        <x-application-logo class="block h-10 w-10 fill-current text-blue-700" />
+                        <span class="hidden text-lg font-bold tracking-tight text-slate-900 sm:inline">ClassPilot</span>
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden items-center gap-1 lg:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         Tableau de bord
                     </x-nav-link>
@@ -40,18 +38,27 @@
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden items-center gap-3 lg:flex">
+                <span class="hidden rounded-full bg-sand-100 px-3 py-1 text-xs font-semibold text-sand-800 xl:inline">
+                    {{ match (Auth::user()->role) {
+                        \App\Models\User::ROLE_STUDENT => 'Espace étudiant',
+                        \App\Models\User::ROLE_TEACHER => 'Espace enseignant',
+                        default => 'Administration',
+                    } }}
+                </span>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                        <button class="inline-flex max-w-56 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-600">
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-900" aria-hidden="true">
+                                {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
+                            </span>
+                            <span class="truncate">{{ Auth::user()->name }}</span>
 
-                            <div class="ms-1">
+                            <span class="ms-1 text-slate-400" aria-hidden="true">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>
-                            </div>
+                            </span>
                         </button>
                     </x-slot>
 
@@ -60,11 +67,10 @@
                             Mon profil
                         </x-dropdown-link>
 
-                        <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
-                            <button type="submit" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
+                            <button type="submit" class="block w-full px-4 py-2.5 text-start text-sm font-medium leading-5 text-coral-700 transition hover:bg-coral-50 focus-visible:bg-coral-50">
                                 Se déconnecter
                             </button>
                         </form>
@@ -72,9 +78,8 @@
                 </x-dropdown>
             </div>
 
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button type="button" @click="open = ! open" :aria-expanded="open.toString()" aria-label="Ouvrir ou fermer le menu" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+            <div class="flex items-center lg:hidden">
+                <button type="button" @click="open = ! open" :aria-expanded="open.toString()" aria-controls="navigation-mobile" aria-label="Ouvrir ou fermer le menu" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-emerald-600">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -84,9 +89,8 @@
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
+    <div id="navigation-mobile" :class="{'block': open, 'hidden': ! open}" class="hidden border-t border-slate-200/80 bg-white px-4 pb-5 pt-3 lg:hidden">
+        <div class="flex flex-col gap-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 Tableau de bord
             </x-responsive-nav-link>
@@ -114,23 +118,26 @@
             @endif
         </div>
 
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+        <div class="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4">
+            <div class="flex items-center gap-3 px-2">
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-900" aria-hidden="true">
+                    {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1)) }}
+                </span>
+                <div class="min-w-0">
+                    <div class="truncate text-sm font-semibold text-slate-900">{{ Auth::user()->name }}</div>
+                    <div class="truncate text-xs text-slate-500">{{ Auth::user()->email }}</div>
+                </div>
             </div>
 
-            <div class="mt-3 space-y-1">
+            <div class="flex flex-col gap-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
                     Mon profil
                 </x-responsive-nav-link>
 
-                <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
-                    <button type="submit" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
+                    <button type="submit" class="block w-full rounded-xl px-4 py-3 text-start text-sm font-medium text-coral-700 transition hover:bg-coral-50 focus-visible:ring-2 focus-visible:ring-coral-600">
                         Se déconnecter
                     </button>
                 </form>

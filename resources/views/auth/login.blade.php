@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Connexion à ClassPilot</h1>
-        <p class="mt-2 text-sm text-gray-600">
+        <h1 class="cp-heading text-3xl">Connexion à ClassPilot</h1>
+        <p class="mt-2 text-sm leading-6 text-slate-600">
             Connecte-toi pour retrouver tes tâches et tes échéances.
         </p>
     </div>
@@ -30,14 +30,14 @@
 
         <div class="mt-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">Se souvenir de moi</span>
+                <input id="remember_me" type="checkbox" class="rounded border-slate-300 text-emerald-700 shadow-sm focus:ring-emerald-600" name="remember">
+                <span class="ms-2 text-sm text-slate-600">Se souvenir de moi</span>
             </label>
         </div>
 
         <div class="mt-6 flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">
             @if (Route::has('password.request'))
-                <a class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" href="{{ route('password.request') }}">
+                <a class="rounded-md text-sm text-slate-600 underline decoration-transparent underline-offset-4 hover:text-slate-900 hover:decoration-current focus-visible:ring-2 focus-visible:ring-emerald-600" href="{{ route('password.request') }}">
                     Mot de passe oublié ?
                 </a>
             @endif
@@ -48,9 +48,9 @@
         </div>
 
         @if (Route::has('register'))
-            <p class="mt-6 border-t border-gray-200 pt-5 text-center text-sm text-gray-600">
+            <p class="mt-6 border-t border-slate-200 pt-5 text-center text-sm text-slate-600">
                 Pas encore de compte ?
-                <a class="font-medium text-indigo-700 underline hover:text-indigo-900" href="{{ route('register') }}">
+                <a class="font-semibold text-emerald-800 underline decoration-transparent underline-offset-4 hover:decoration-current" href="{{ route('register') }}">
                     Créer un compte étudiant
                 </a>
             </p>

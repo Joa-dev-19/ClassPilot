@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Choisir un nouveau mot de passe</h1>
+        <h1 class="cp-heading text-3xl">Choisir un nouveau mot de passe</h1>
     </div>
 
     <form method="POST" action="{{ route('password.store') }}">

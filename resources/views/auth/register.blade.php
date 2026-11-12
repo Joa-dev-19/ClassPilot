@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Créer un compte étudiant</h1>
-        <p class="mt-2 text-sm text-gray-600">
+        <h1 class="cp-heading text-3xl">Créer un compte étudiant</h1>
+        <p class="mt-2 text-sm leading-6 text-slate-600">
             Inscris-toi pour organiser tes tâches et suivre tes échéances.
         </p>
     </div>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="mt-6 flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">
-            <a class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" href="{{ route('login') }}">
+            <a class="rounded-md text-sm text-slate-600 underline decoration-transparent underline-offset-4 hover:text-slate-900 hover:decoration-current focus-visible:ring-2 focus-visible:ring-emerald-600" href="{{ route('login') }}">
                 Déjà inscrit ? Se connecter
             </a>
 

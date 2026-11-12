@@ -1,22 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
+        <h2 class="cp-heading text-xl">
+            Mon profil
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+    <div class="cp-page">
+        <div class="cp-page-inner flex flex-col gap-5">
+            <section class="cp-card p-5 sm:p-8">
                 <div class="max-w-xl">
                     <section>
                         <header>
-                            <h2 class="text-lg font-medium text-gray-900">
-                                {{ __('Profile Information') }}
+                            <h2 class="text-lg font-bold text-slate-900">
+                                Informations du profil
                             </h2>
 
-                            <p class="mt-1 text-sm text-gray-600">
-                                {{ __('Update your account profile information and email address.') }}
+                            <p class="mt-1 text-sm leading-6 text-slate-600">
+                                Mets à jour ton nom et ton adresse e-mail.
                             </p>
                         </header>
 
@@ -25,36 +25,36 @@
                             @method('PATCH')
 
                             <div>
-                                <x-input-label for="name" :value="__('Name')" />
+                                <x-input-label for="name" value="Nom complet" />
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                                     :value="old('name', $user->name)" required autofocus autocomplete="name" />
                                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             </div>
 
                             <div>
-                                <x-input-label for="email" :value="__('Email')" />
+                                <x-input-label for="email" value="Adresse e-mail" />
                                 <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                     :value="old('email', $user->email)" required autocomplete="username" />
                                 <x-input-error class="mt-2" :messages="$errors->get('email')" />
                             </div>
 
                             <div class="flex items-center gap-4">
-                                <x-primary-button>{{ __('Save') }}</x-primary-button>
+                                <x-primary-button>Enregistrer</x-primary-button>
 
                                 @if (session('status') === 'profile-updated')
-                                    <p class="text-sm text-gray-600">{{ __('Saved.') }}</p>
+                                    <p class="text-sm text-emerald-800">Modifications enregistrées.</p>
                                 @endif
                             </div>
                         </form>
                     </section>
                 </div>
-            </div>
+            </section>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+            <section class="cp-card p-5 sm:p-8">
                 <div class="max-w-xl">
                     @include('profile.partials.update-password-form')
                 </div>
-            </div>
+            </section>
 
         </div>
     </div>
