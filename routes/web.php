@@ -1,6 +1,7 @@
 
 <?php
 
+use App\Http\Controllers\Admin\UtilisateurController;
 use App\Http\Controllers\CalendrierController;
 use App\Http\Controllers\DevoirController;
 use App\Http\Controllers\ProfileController;
@@ -83,5 +84,22 @@ Route::middleware(['auth', 'account.active', 'verified', 'role:enseignant'])->gr
     Route::get('/devoirs/{devoir}', [DevoirController::class, 'show'])
         ->name('devoirs.show');
 });
+
+Route::middleware(['auth', 'account.active', 'verified', 'role:administrateur'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/utilisateurs', [UtilisateurController::class, 'index'])
+            ->name('utilisateurs.index');
+
+        Route::get('/utilisateurs/{user}', [UtilisateurController::class, 'show'])
+            ->name('utilisateurs.show');
+
+        Route::patch('/utilisateurs/{user}/activer', [UtilisateurController::class, 'activate'])
+            ->name('utilisateurs.activate');
+
+        Route::patch('/utilisateurs/{user}/desactiver', [UtilisateurController::class, 'deactivate'])
+            ->name('utilisateurs.deactivate');
+    });
 
 require __DIR__.'/auth.php';

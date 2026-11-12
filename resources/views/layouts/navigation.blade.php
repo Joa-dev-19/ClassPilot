@@ -29,6 +29,10 @@
                         <x-nav-link :href="route('devoirs.index')" :active="request()->routeIs('devoirs.*')">
                             Mes devoirs
                         </x-nav-link>
+                    @elseif (Auth::user()->role === \App\Models\User::ROLE_ADMINISTRATOR)
+                        <x-nav-link :href="route('admin.utilisateurs.index')" :active="request()->routeIs('admin.utilisateurs.*')">
+                            Administration
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -96,6 +100,10 @@
             @elseif (Auth::user()->role === \App\Models\User::ROLE_TEACHER)
                 <x-responsive-nav-link :href="route('devoirs.index')" :active="request()->routeIs('devoirs.*')">
                     Mes devoirs
+                </x-responsive-nav-link>
+            @elseif (Auth::user()->role === \App\Models\User::ROLE_ADMINISTRATOR)
+                <x-responsive-nav-link :href="route('admin.utilisateurs.index')" :active="request()->routeIs('admin.utilisateurs.*')">
+                    Administration
                 </x-responsive-nav-link>
             @endif
         </div>
